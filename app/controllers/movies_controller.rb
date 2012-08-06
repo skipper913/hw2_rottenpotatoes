@@ -13,7 +13,16 @@ class MoviesController < ApplicationController
       @sorted_by = params[:sort_by]
     end
 
-    @movies = Movie.all :order => @sorted_by
+    @all_ratings = Movie.select(:rating).map(&:rating).uniq
+    @ratings = []
+    if params[:ratings].is_a?(Hash) then
+      @ratings = params[:ratings].keys.reject do |x|
+        !@all_ratings.include? x
+      end
+    end
+
+    #@movies = Movie.all
+    @movies = Movie.find(:all, :conditions  => ["rating in (?)", @ratings], :order => @sorted_by)
   end
 
   def new
